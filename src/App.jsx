@@ -3,7 +3,7 @@ import Dashboard from "./Pages/Dashboard";
 import PulsoEnVivo from "./Pages/PulsoEnVivo";
 import Historial from "./Pages/Historial";
 import Perfil from "./Pages/Perfil";
-import "./index.css";
+import "./Index.css";
 
 function App() {
   return (
