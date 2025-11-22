@@ -1,116 +1,52 @@
 import { useEffect, useState } from "react";
 import { ref, onValue } from "firebase/database";
-import {db} from "../lib/firebase"
-
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  Tooltip,
-  ResponsiveContainer
-} from "recharts";
+import { db } from "../lib/firebase";
+import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer } from "recharts";
 
 export default function DashboardPulso() {
-  const [bpm, setBpm] = useState(null);
-  const [spo2, setSpo2] = useState(null);
-  const [fecha, setFecha] = useState(null);
   const [historial, setHistorial] = useState([]);
   const [alerta, setAlerta] = useState(false);
 
   useEffect(() => {
     const sensorRef = ref(db, "sensorPulse");
-
     onValue(sensorRef, (snapshot) => {
       const data = snapshot.val();
-
       if (data) {
-        setBpm(data.bpm);
-        setSpo2(data.spo2);
-        setFecha(data.date);
-
-        // Guardar historial (máximo 20 puntos)
+        // agregar al historial
         setHistorial((prev) => {
-          const nuevo = [...prev, { bpm: data.bpm, time: Date.now() }];
+          const nuevo = [...prev, { bpm: data.bpm, spo2: data.spo2, time: data.timestamp }];
           return nuevo.slice(-20);
         });
 
-        // Alerta automática
-        if (data.bpm >= 100) {
-          setAlerta(true);
-        } else {
-          setAlerta(false);
-        }
+        // alerta
+        setAlerta(data.bpm >= 100);
       }
     });
   }, []);
 
   return (
-    <div
-      style={{
-        padding: "16px",
-        fontFamily: "Arial, sans-serif",
-        maxWidth: "480px",
-        margin: "0 auto"
-      }}
-    >
-      <h2 style={{ textAlign: "center", marginBottom: "10px" }}>
-        📊 Monitor Cardíaco
-      </h2>
+    <div className="p-4 max-w-xl mx-auto font-sans">
+      <h2 className="text-center text-xl mb-4">📊 Monitor Cardíaco</h2>
 
-      {/* ALERTA */}
       {alerta && (
-        <div
-          style={{
-            background: "#ff7272",
-            color: "white",
-            padding: "12px",
-            borderRadius: "10px",
-            marginBottom: "16px",
-            textAlign: "center",
-            fontWeight: "bold"
-          }}
-        >
-          ⚠️ ALERTA: BPM demasiado alto ({bpm})
+        <div className="bg-red-400 text-white p-3 rounded mb-4 text-center font-bold">
+          ⚠️ ALERTA: BPM demasiado alto
         </div>
       )}
 
-      {/* TARJETA VALORES */}
-      <div
-        style={{
-          background: "white",
-          padding: "18px",
-          borderRadius: "14px",
-          boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-          marginBottom: "20px"
-        }}
-      >
-        <h3 style={{ marginBottom: "10px" }}>Datos en Tiempo Real</h3>
-
-        <p style={{ fontSize: "20px", margin: 0 }}>
-          ❤️ <strong>{bpm !== null ? bpm : "..."}</strong> BPM
-        </p>
-
-        <p style={{ fontSize: "18px", margin: "6px 0" }}>
-          🩸 <strong>{spo2 !== null ? spo2 : "..."}%</strong> SpO2
-        </p>
-
-        <p style={{ fontSize: "14px", opacity: 0.6 }}>
-          🕒 Timestamp: {fecha}
-        </p>
+      <div className="bg-white p-4 rounded shadow mb-4">
+        {historial.length > 0 && (
+          <>
+            <p className="text-gray-700">Última lectura: ❤️ {historial[historial.length-1].bpm} BPM | 🩸 {historial[historial.length-1].spo2}% SpO₂</p>
+            <p className="text-gray-500 text-xs">
+              {new Date(historial[historial.length-1].time).toLocaleString()}
+            </p>
+          </>
+        )}
       </div>
 
-      {/* GRÁFICA */}
-      <div
-        style={{
-          background: "white",
-          padding: "16px",
-          borderRadius: "14px",
-          boxShadow: "0 2px 8px rgba(0,0,0,0.1)"
-        }}
-      >
-        <h3 style={{ marginBottom: "10px" }}>Gráfica de BPM</h3>
-
+      <div className="bg-white p-4 rounded shadow">
+        <h3 className="mb-2">Gráfica BPM (últimos 20 puntos)</h3>
         <ResponsiveContainer width="100%" height={240}>
           <LineChart data={historial}>
             <Line type="monotone" dataKey="bpm" stroke="#ff4d4d" strokeWidth={3} dot={false} />
@@ -119,19 +55,6 @@ export default function DashboardPulso() {
             <Tooltip />
           </LineChart>
         </ResponsiveContainer>
-      </div>
-
-      {/* HISTORIAL */}
-      <div style={{ marginTop: "20px" }}>
-        <h3>Historial (últimos 20)</h3>
-
-        <ul style={{ paddingLeft: "14px" }}>
-          {historial.map((item, index) => (
-            <li key={index}>
-              {item.bpm} BPM
-            </li>
-          ))}
-        </ul>
       </div>
     </div>
   );
