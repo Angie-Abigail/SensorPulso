@@ -1,30 +1,78 @@
 import { NavLink } from "react-router-dom";
+import { LayoutGrid, Activity, CalendarClock, User } from "lucide-react";
 
 export default function Navbar() {
+  
+  // Clase base para todos los botones
+  const linkClass = "flex flex-col items-center justify-center w-full h-full gap-1 py-2 transition-all duration-300 relative group";
+
   return (
-    <nav className="fixed bottom-0 left-0 w-full bg-white shadow-xl py-3 flex justify-around z-50">
+    <nav className="fixed bottom-0 left-0 w-full z-50 bg-white/90 backdrop-blur-lg border-t border-slate-200 pb-safe pt-2 shadow-[0_-5px_20px_-5px_rgba(0,0,0,0.05)]">
+      <div className="flex justify-around items-center px-2 pb-4">
 
-      <NavLink to="/" className="flex flex-col items-center text-gray-500 hover:text-red-500">
-        <span className="text-xl">🏠</span>
-        <p className="text-xs">Inicio</p>
-      </NavLink>
+        {/* INICIO */}
+        <NavLink to="/" className={({ isActive }) => 
+            `${linkClass} ${isActive ? "text-rose-500" : "text-slate-400 hover:text-slate-600"}`
+        }>
+            {({ isActive }) => (
+                <>
+                    {/* Indicador superior animado */}
+                    <span className={`absolute -top-2 w-8 h-1 rounded-b-full bg-rose-500 transition-all duration-300 ${isActive ? 'opacity-100' : 'opacity-0'}`}></span>
+                    
+                    <div className={`p-1.5 rounded-xl transition-all ${isActive ? 'bg-rose-50' : 'bg-transparent'}`}>
+                        <LayoutGrid size={24} strokeWidth={isActive ? 2.5 : 2} />
+                    </div>
+                    <span className="text-[10px] font-medium tracking-wide">Inicio</span>
+                </>
+            )}
+        </NavLink>
 
-      <NavLink to="/live" className="flex flex-col items-center text-gray-500 hover:text-red-500">
-        <span className="text-xl">❤️</span>
-        <p className="text-xs">Pulso</p>
-      </NavLink>
+        {/* PULSO (LIVE) */}
+        <NavLink to="/live" className={({ isActive }) => 
+            `${linkClass} ${isActive ? "text-rose-500" : "text-slate-400 hover:text-slate-600"}`
+        }>
+             {({ isActive }) => (
+                <>
+                    <span className={`absolute -top-2 w-8 h-1 rounded-b-full bg-rose-500 transition-all duration-300 ${isActive ? 'opacity-100' : 'opacity-0'}`}></span>
+                    <div className={`p-1.5 rounded-xl transition-all ${isActive ? 'bg-rose-50' : 'bg-transparent'}`}>
+                        <Activity size={24} strokeWidth={isActive ? 2.5 : 2} />
+                    </div>
+                    <span className="text-[10px] font-medium tracking-wide">Pulso</span>
+                </>
+            )}
+        </NavLink>
 
-      <NavLink to="/historial" className="flex flex-col items-center text-gray-500 hover:text-red-500">
-        <span className="text-xl">📊</span>
-        <p className="text-xs">Historial</p>
-      </NavLink>
+        {/* HISTORIAL */}
+        <NavLink to="/historial" className={({ isActive }) => 
+            `${linkClass} ${isActive ? "text-rose-500" : "text-slate-400 hover:text-slate-600"}`
+        }>
+             {({ isActive }) => (
+                <>
+                    <span className={`absolute -top-2 w-8 h-1 rounded-b-full bg-rose-500 transition-all duration-300 ${isActive ? 'opacity-100' : 'opacity-0'}`}></span>
+                    <div className={`p-1.5 rounded-xl transition-all ${isActive ? 'bg-rose-50' : 'bg-transparent'}`}>
+                        <CalendarClock size={24} strokeWidth={isActive ? 2.5 : 2} />
+                    </div>
+                    <span className="text-[10px] font-medium tracking-wide">Historial</span>
+                </>
+            )}
+        </NavLink>
 
-      {/* NUEVA SECCIÓN */}
-      <NavLink to="/perfil" className="flex flex-col items-center text-gray-500 hover:text-red-500">
-        <span className="text-xl">👤</span>
-        <p className="text-xs">Perfil</p>
-      </NavLink>
+        {/* PERFIL */}
+        <NavLink to="/perfil" className={({ isActive }) => 
+            `${linkClass} ${isActive ? "text-rose-500" : "text-slate-400 hover:text-slate-600"}`
+        }>
+             {({ isActive }) => (
+                <>
+                    <span className={`absolute -top-2 w-8 h-1 rounded-b-full bg-rose-500 transition-all duration-300 ${isActive ? 'opacity-100' : 'opacity-0'}`}></span>
+                    <div className={`p-1.5 rounded-xl transition-all ${isActive ? 'bg-rose-50' : 'bg-transparent'}`}>
+                        <User size={24} strokeWidth={isActive ? 2.5 : 2} />
+                    </div>
+                    <span className="text-[10px] font-medium tracking-wide">Perfil</span>
+                </>
+            )}
+        </NavLink>
 
+      </div>
     </nav>
   );
 }
