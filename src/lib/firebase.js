@@ -5,7 +5,7 @@ import {getAuth, GoogleAuthProvider} from "firebase/auth";
 import { getFirestore } from "firebase/firestore";
 
 const firebaseConfig = {
-  apiKey: "TU_API_KEY",
+  apiKey: "AIzaSyC6_zQxYp1g1r2c3r4l5b6a7h8w9a0b1c2d",
   authDomain: "fir-app2-6dc27.firebaseapp.com",
   databaseURL: "https://fir-app2-6dc27-default-rtdb.firebaseio.com",
   projectId: "fir-app2-6dc27",

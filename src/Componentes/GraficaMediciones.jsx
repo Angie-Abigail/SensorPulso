@@ -15,6 +15,28 @@ import {
 // 💡 Constante para limitar las mediciones a las 5 últimas
 const MAX_DATA_POINTS_MOBILE = 5;
 
+// ====================================================================
+// 🎯 Nuevo Componente para el Tooltip Personalizado
+// Esto permite formatear los números (BPM y SpO2) a 2 decimales en el hover.
+const CustomTooltip = ({ active, payload, label }) => {
+    if (active && payload && payload.length) {
+        return (
+            <div className="bg-slate-800 p-2 rounded-lg text-white shadow-lg border border-slate-700 text-xs">
+                <p className="font-bold text-slate-400 mb-1">{`Hora: ${label}`}</p>
+                {payload.map((item, index) => (
+                    <p key={index} style={{ color: item.stroke }}>
+                        {/* 🎯 Aplicamos toFixed(2) al valor */}
+                        {`${item.name}: ${parseFloat(item.value).toFixed(2)} ${item.dataKey === 'bpm' ? 'bpm' : '%'}`}
+                    </p>
+                ))}
+            </div>
+        );
+    }
+    return null;
+};
+// ====================================================================
+
+
 export default function GraficaMediciones() {
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -23,11 +45,11 @@ export default function GraficaMediciones() {
         const cargarMediciones = async () => {
             setLoading(true);
             try {
-                // 🎯 Solo traemos los últimos 5 puntos
+                // Solo traemos los últimos 5 puntos
                 const q = query(
                     collection(firestore, "mediciones"),
-                    orderBy("timestamp", "desc"), 
-                    limit(MAX_DATA_POINTS_MOBILE) // Aplicamos el límite de 5
+                    orderBy("timestamp", "desc"),
+                    limit(MAX_DATA_POINTS_MOBILE) 
                 );
 
                 const snapshot = await getDocs(q);
@@ -35,7 +57,6 @@ export default function GraficaMediciones() {
                 const datosFormateados = snapshot.docs.map((doc) => {
                     const medicion = doc.data();
                     
-                    // Manejo seguro del Timestamp de Firestore para evitar Invalid Date
                     let timestampMs = Date.now(); 
 
                     if (medicion.timestamp && typeof medicion.timestamp.seconds === 'number') {
@@ -52,7 +73,7 @@ export default function GraficaMediciones() {
                         bpm: medicion.bpm,
                         spo2: medicion.spo2,
                     };
-                }).reverse(); // Invertimos el orden para que la gráfica vaya de pasado a presente
+                }).reverse(); 
 
                 setData(datosFormateados);
             } catch (error) {
@@ -67,17 +88,19 @@ export default function GraficaMediciones() {
 
     // 4. Mostrar la gráfica:
     if (loading) {
-        return <div className="text-center p-10 text-slate-500 font-medium">Cargando datos del historial...</div>;
+        return <div className="h-64 flex items-center justify-center text-slate-500 font-medium">Cargando datos del historial...</div>;
     }
 
     if (data.length === 0) {
-        return <div className="text-center p-10 text-gray-500">No hay mediciones guardadas para mostrar la gráfica.</div>;
+        return <div className="h-64 flex items-center justify-center text-gray-500">No hay mediciones guardadas para mostrar la gráfica.</div>;
     }
 
     return (
-        <div className="h-64 w-full">
+        // El contenedor con h-64 y w-full asegura la responsividad
+        <div className="h-64 w-full"> 
             <ResponsiveContainer width="100%" height="100%">
-                <AreaChart data={data} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}> 
+                {/* 🚀 CAMBIO 1: Reducción de margen horizontal (right: 5, left: 5) para móviles */}
+                <AreaChart data={data} margin={{ top: 10, right: 5, left: 5, bottom: 0 }}> 
                     <defs>
                         {/* Degradados */}
                         <linearGradient id="colorBpmFS" x1="0" y1="0" x2="0" y2="1">
@@ -91,41 +114,37 @@ export default function GraficaMediciones() {
                     </defs>
                     <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
 
-                    {/* Eje X (Mejoras de estilo) */}
+                    {/* Eje X: Optimizaciones para móvil (sin rotación, interval=0, fuente pequeña) */}
                     <XAxis
                         dataKey="name"
-                        tick={{ fontSize: 10, fill: '#64748b' }} // Fuente un poco más legible
-                        angle={0} // Sin rotación
-                        textAnchor="middle" // Centramos el texto
-                        height={25} // Altura optimizada
-                        interval={0} // Aseguramos que se muestren los 5 puntos
+                        tick={{ fontSize: 10, fill: '#64748b' }}
+                        angle={0}
+                        textAnchor="middle" 
+                        height={25}
+                        interval={0} 
                     />
 
-                    {/* Eje Y BPM */}
+                    {/* Eje Y BPM: Ancho reducido a 25 */}
                     <YAxis
                         yAxisId="left"
                         stroke="#f43f5e"
                         domain={['dataMin - 5', 'dataMax + 5']}
                         tick={{ fontSize: 9 }}
-                        width={30}
+                        width={25} 
                     />
-                    {/* Eje Y SpO2 */}
+                    {/* Eje Y SpO2: Ancho reducido a 25 */}
                     <YAxis
                         yAxisId="right"
                         orientation="right"
                         stroke="#3b82f6"
-                        domain={[85, 100]} // Mantenemos el dominio restringido para SpO2
+                        domain={[85, 100]}
                         tick={{ fontSize: 9 }}
-                        width={30} 
+                        width={25} 
                     />
 
-                    {/* Tooltip */}
-                    <Tooltip
-                        contentStyle={{ backgroundColor: '#1e293b', borderRadius: '8px', border: 'none', color: '#fff' }}
-                        itemStyle={{ color: '#fff' }}
-                        labelStyle={{ color: '#94a3b8' }}
-                        cursor={{ stroke: '#94a3b8', strokeWidth: 1, strokeDasharray: '4 4' }}
-                    />
+                    {/* 🚀 CAMBIO 2: Usar el Tooltip Personalizado para formatear a 2 decimales */}
+                    <Tooltip content={<CustomTooltip />} /> 
+                    
                     <Legend wrapperStyle={{ paddingTop: 10, fontSize: 10 }} />
 
                     {/* Gráficas */}
